@@ -8,9 +8,18 @@ public class DataStorage {
 
     private static final String FILE = "university_data.ser";
 
+    private static DataStorage instance;
+
     private DataStorage() {}
 
-    public static void save(List<?> data) {
+    public static DataStorage getInstance() {
+        if (instance == null) {
+            instance = new DataStorage();
+        }
+        return instance;
+    }
+
+    public void save(List<?> data) {
         try (ObjectOutputStream oos = new ObjectOutputStream(
                 new FileOutputStream(FILE))) {
             oos.writeObject(data);
@@ -21,25 +30,28 @@ public class DataStorage {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> List<T> load() {
+    public <T> List<T> load() {
         File f = new File(FILE);
         if (!f.exists()) return new ArrayList<>();
+
         try (ObjectInputStream ois = new ObjectInputStream(
                 new FileInputStream(FILE))) {
+
             List<T> data = (List<T>) ois.readObject();
             System.out.println("[Storage] Loaded " + data.size() + " records.");
             return data;
+
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("[Storage] Could not load data: " + e.getMessage());
             return new ArrayList<>();
         }
     }
 
-    public static boolean hasSavedData() {
+    public boolean hasSavedData() {
         return new File(FILE).exists();
     }
 
-    public static void delete() {
+    public void delete() {
         if (new File(FILE).delete())
             System.out.println("[Storage] Saved data cleared.");
     }
