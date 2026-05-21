@@ -132,7 +132,7 @@ public class Main {
             System.out.println("  [Storage] Session restored!");
         } 
         
-        // support requests
+        
         SupportRequest r1 = new SupportRequest("Projector broken in Room 204", alice, UrgencyLevel.HIGH);
         SupportRequest r2 = new SupportRequest("Printer offline in Lab 101",   bob,   UrgencyLevel.LOW);
         support.addRequest(r1);
