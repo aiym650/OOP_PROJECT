@@ -40,11 +40,14 @@ public class Main {
             String choice = sc.nextLine().trim();
             switch (choice) {
                 case "1" -> loginFlow();
-                case "0" -> running = false;
+                case "0" -> {
+                    DataStorage.save(allUsers);
+                    running = false;
+                }
                 default  -> System.out.println("  Unknown option.");
             }
         }
-        System.out.println("\n  Goodbye! System shutting down.");
+        System.out.println("\n  Goodbye! Data saved. System shutting down.");
         sc.close();
     }
 
@@ -121,16 +124,22 @@ public class Main {
         if (DataStorage.hasSavedData()) {
             List<User> saved = DataStorage.load();
             for (User u : saved) {
-                if (u.getId().equals("s001") && u instanceof Student s) alice = s;
-                if (u.getId().equals("s002") && u instanceof Student s) bob   = s;
-                if (u.getId().equals("g001") && u instanceof GraduateStudent g) dana = g;
-                if (u.getId().equals("t001") && u instanceof Teacher te) prof  = te;
-                
-                allUsers.replaceAll(existing -> existing.getId().equals(u.getId()) ? u : existing);
-                students.replaceAll(existing -> existing.getId().equals(u.getId()) ? (Student)u : existing);
+                allUsers.replaceAll(e -> e.getId().equals(u.getId()) ? u : e);
+                students.replaceAll(e -> e.getId().equals(u.getId()) ? (Student) u : e);
+                auth.updateUser(u); 
+                switch (u.getId()) {
+                    case "t001" -> prof    = (Teacher) u;
+                    case "s001" -> alice   = (Student) u;
+                    case "s002" -> bob     = (Student) u;
+                    case "g001" -> dana    = (GraduateStudent) u;
+                    case "a001" -> admin   = (Admin) u;
+                    case "m001" -> manager = (Manager) u;
+                    case "d001" -> dean    = (Manager) u;
+                    case "ts001"-> support = (TechSupportSpecialist) u;
+                }
             }
             System.out.println("  [Storage] Session restored!");
-        } 
+        }
         
         
         SupportRequest r1 = new SupportRequest("Projector broken in Room 204", alice, UrgencyLevel.HIGH);

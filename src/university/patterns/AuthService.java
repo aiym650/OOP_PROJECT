@@ -30,6 +30,10 @@ public class AuthService {
         userRegistry.put(user.getId(), user);
     }
 
+    public void updateUser(User user) {
+        userRegistry.put(user.getId(), user);
+    }
+
     public User login(String userId, String password) throws AuthenticationException {
         User user = userRegistry.get(userId);
         if (user == null || !user.login(password)) {
@@ -51,4 +55,6 @@ public class AuthService {
     public User getCurrentUser()  { return currentUser; }
     public boolean isLoggedIn()   { return currentUser != null; }
     public int getUserCount()     { return userRegistry.size(); }
+
+	
 }
