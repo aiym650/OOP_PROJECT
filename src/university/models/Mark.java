@@ -7,18 +7,37 @@ public class Mark implements Serializable, Comparable<Mark> {
 
     private static final long serialVersionUID = 1L;
 
+    public static final double MAX_ATTEST  = 30.0;
+    public static final double MAX_FINAL   = 40.0;
+
     private double attest1;
     private double attest2;
     private double finalExam;
 
     public Mark(double attest1, double attest2, double finalExam) {
-        this.attest1   = attest1;
-        this.attest2   = attest2;
-        this.finalExam = finalExam;
+        this.attest1   = clampAttest(attest1);
+        this.attest2   = clampAttest(attest2);
+        this.finalExam = clampFinal(finalExam);
     }
 
+    // ── helpers ──────────────────────────────────────────────────────────────
+    private static double clampAttest(double v) {
+        if (v < 0 || v > MAX_ATTEST)
+            throw new IllegalArgumentException(
+                    "Attestation score must be between 0 and " + (int) MAX_ATTEST + ", got: " + v);
+        return v;
+    }
+
+    private static double clampFinal(double v) {
+        if (v < 0 || v > MAX_FINAL)
+            throw new IllegalArgumentException(
+                    "Final exam score must be between 0 and " + (int) MAX_FINAL + ", got: " + v);
+        return v;
+    }
+
+    
     public double getTotal() {
-        return attest1 * 0.30 + attest2 * 0.30 + finalExam * 0.40;
+        return attest1 + attest2 + finalExam;
     }
 
     public String getGrade() {
@@ -48,11 +67,11 @@ public class Mark implements Serializable, Comparable<Mark> {
     }
 
     public double getAttest1()              { return attest1; }
-    public void   setAttest1(double v)      { this.attest1 = v; }
+    public void   setAttest1(double v)      { this.attest1   = clampAttest(v); }
     public double getAttest2()              { return attest2; }
-    public void   setAttest2(double v)      { this.attest2 = v; }
+    public void   setAttest2(double v)      { this.attest2   = clampAttest(v); }
     public double getFinalExam()            { return finalExam; }
-    public void   setFinalExam(double v)    { this.finalExam = v; }
+    public void   setFinalExam(double v)    { this.finalExam = clampFinal(v); }
 
     @Override
     public boolean equals(Object o) {

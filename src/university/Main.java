@@ -18,6 +18,7 @@ public class Main {
 
     private static final List<Course>         courses  = new ArrayList<>();
     private static final List<Student>        students = new ArrayList<>();
+    private static final List<Teacher>        teachers = new ArrayList<>();
     private static final List<SupportRequest> requests = new ArrayList<>();
     private static final List<User>           allUsers = new ArrayList<>();
 
@@ -81,6 +82,7 @@ public class Main {
             allUsers.add(u);
         }
         students.addAll(List.of(alice, bob, dana));
+        teachers.add(prof);
 
         // ── Courses ──────────────────────────────────────────────────────────
         Course oop = new Course("CS101", "OOP in Java",  6, CourseType.MAJOR, 2, "CS");
@@ -128,7 +130,7 @@ public class Main {
                 students.replaceAll(e -> e.getId().equals(u.getId()) ? (Student) u : e);
                 auth.updateUser(u); 
                 switch (u.getId()) {
-                    case "t001" -> prof    = (Teacher) u;
+                    case "t001" -> { prof = (Teacher) u; if (!teachers.contains(prof)) teachers.add(prof); }
                     case "s001" -> alice   = (Student) u;
                     case "s002" -> bob     = (Student) u;
                     case "g001" -> dana    = (GraduateStudent) u;
@@ -341,7 +343,9 @@ public class Main {
                         double fn = Double.parseDouble(sc.nextLine().trim());
                         t.putMark(student.get(), course.get(), new Mark(a1, a2, fn));
                     } catch (NumberFormatException e) {
-                        System.out.println("  Invalid number.");
+                        System.out.println("  Invalid number format.");
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("  Score out of range: " + e.getMessage());
                     }
                 }
                 case "4" -> {
@@ -461,12 +465,16 @@ public class Main {
             System.out.println("║  5. Create news                  ║");
             System.out.println("║  6. View support requests        ║");
             System.out.println("║  7. View messages                ║");
+            System.out.println("║  8. Add new course               ║");
+            System.out.println("║  9. Add new teacher              ║");
             System.out.println("║  0. Logout                       ║");
             System.out.println("╚══════════════════════════════════╝");
             System.out.print("  Choice: ");
             switch (sc.nextLine().trim()) {
                 case "1" -> {
+                    listTeachers();
                     System.out.print("  Teacher ID: "); String tid = sc.nextLine().trim();
+                    listCourses();
                     System.out.print("  Course ID:  "); String cid = sc.nextLine().trim();
                     findTeacher(tid).ifPresentOrElse(t ->
                         findCourse(cid).ifPresentOrElse(c -> m.assignCourse(t, c),
@@ -495,6 +503,61 @@ public class Main {
                 }
                 case "6" -> m.viewRequests(requests);
                 case "7" -> m.viewMessages();
+                case "8" -> {
+                    System.out.print("  Course ID:    "); String cid  = sc.nextLine().trim();
+                    System.out.print("  Course name:  "); String cname = sc.nextLine().trim();
+                    System.out.print("  Credits:      ");
+                    int cr;
+                    try { cr = Integer.parseInt(sc.nextLine().trim()); }
+                    catch (NumberFormatException e) { System.out.println("  Invalid credits."); break; }
+                    System.out.println("  Type: 1=MAJOR  2=MINOR  3=FREE_ELECTIVE");
+                    System.out.print("  Choice: ");
+                    CourseType ct = switch (sc.nextLine().trim()) {
+                        case "2" -> CourseType.MINOR;
+                        case "3" -> CourseType.FREE_ELECTIVE;
+                        default  -> CourseType.MAJOR;
+                    };
+                    System.out.print("  For year (1-4): ");
+                    int yr;
+                    try { yr = Integer.parseInt(sc.nextLine().trim()); }
+                    catch (NumberFormatException e) { System.out.println("  Invalid year."); break; }
+                    System.out.print("  For major:    "); String maj = sc.nextLine().trim();
+                    if (findCourse(cid).isPresent()) {
+                        System.out.println("  Course with this ID already exists.");
+                        break;
+                    }
+                    Course nc = new Course(cid, cname, cr, ct, yr, maj);
+                    courses.add(nc);
+                    System.out.println("  Course added: " + nc);
+                }
+                case "9" -> {
+                    System.out.print("  Teacher ID:         "); String tid  = sc.nextLine().trim();
+                    System.out.print("  First name:         "); String tfn  = sc.nextLine().trim();
+                    System.out.print("  Last name:          "); String tln  = sc.nextLine().trim();
+                    System.out.print("  Password:           "); String tpw  = sc.nextLine().trim();
+                    System.out.print("  Salary:             ");
+                    double sal;
+                    try { sal = Double.parseDouble(sc.nextLine().trim()); }
+                    catch (NumberFormatException e) { System.out.println("  Invalid salary."); break; }
+                    System.out.print("  Department:         "); String dep  = sc.nextLine().trim();
+                    System.out.println("  Position: 1=TUTOR  2=LECTOR  3=SENIOR_LECTOR  4=PROFESSOR");
+                    System.out.print("  Choice: ");
+                    TeacherPosition pos = switch (sc.nextLine().trim()) {
+                        case "2" -> TeacherPosition.LECTOR;
+                        case "3" -> TeacherPosition.SENIOR_LECTOR;
+                        case "4" -> TeacherPosition.PROFESSOR;
+                        default  -> TeacherPosition.TUTOR;
+                    };
+                    if (findUser(tid).isPresent()) {
+                        System.out.println("  User with this ID already exists.");
+                        break;
+                    }
+                    Teacher nt = new Teacher(tid, tfn, tln, tpw, Language.EN, sal, dep, pos);
+                    auth.registerUser(nt);
+                    allUsers.add(nt);
+                    teachers.add(nt);
+                    System.out.println("  Teacher added: " + nt.getFullName() + " (ID: " + tid + ")");
+                }
                 case "0" -> active = false;
                 default  -> System.out.println("  Unknown option.");
             }
@@ -599,6 +662,15 @@ public class Main {
         return allUsers.stream()
                 .filter(u -> u instanceof Teacher && u.getId().equalsIgnoreCase(id))
                 .map(u -> (Teacher) u).findFirst();
+    }
+
+    private static void listTeachers() {
+        System.out.println("  Available teachers:");
+        allUsers.stream()
+                .filter(u -> u instanceof Teacher)
+                .map(u -> (Teacher) u)
+                .forEach(t -> System.out.printf("  %-8s %-25s %s%n",
+                        t.getId(), t.getFullName(), t.getPosition()));
     }
 
     private static Optional<User> findUser(String id) {
