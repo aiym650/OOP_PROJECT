@@ -24,7 +24,7 @@ public class News implements Serializable {
         this.topic   = topic;
         this.author  = author;
         this.date    = LocalDate.now();
-        this.pinned  = false;
+        this.pinned  = topic != null && topic.equalsIgnoreCase("Research");
     }
 
     public void addComment(String comment) { comments.add(comment); }

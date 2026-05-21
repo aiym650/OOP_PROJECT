@@ -23,7 +23,10 @@ public class TechSupportSpecialist extends Employee {
         System.out.println("=== New Requests ===");
         requests.stream()
                 .filter(r -> r.getStatus() == RequestStatus.NEW)
-                .forEach(System.out::println);
+                .forEach(r -> {
+                    r.setStatus(RequestStatus.VIEWED);
+                    System.out.println(r);
+                });
     }
 
     public void acceptRequest(SupportRequest request) {

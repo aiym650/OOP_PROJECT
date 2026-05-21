@@ -51,10 +51,10 @@ public class GraduateStudent extends Student implements Researcher {
     }
 
     @Override
-    public void printPapers(Format format) {
+    public void printPapers(Comparator<ResearchPaper> comparator) {
         thesisPapers.stream()
-                .sorted(ResearchPaper.BY_CITATIONS)
-                .forEach(p -> System.out.println(p.getCitation(format)));
+                .sorted(comparator)
+                .forEach(p -> System.out.println(p.getCitation(Format.PLAIN_TEXT)));
     }
 
     @Override

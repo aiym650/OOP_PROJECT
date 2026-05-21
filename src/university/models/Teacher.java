@@ -59,6 +59,12 @@ public class Teacher extends Employee implements Researcher, Comparable<Teacher>
         System.out.printf("[Complaint | %s] From %s: %s%n", urgency, getFullName(), description);
     }
 
+    public void sendComplaint(String description, UrgencyLevel urgency, Manager dean) {
+        System.out.printf("[Complaint | %s] From %s → Dean %s: %s%n",
+                urgency, getFullName(), dean.getFullName(), description);
+        sendMessage(dean, "[COMPLAINT | " + urgency + "] " + description);
+    }
+
     public void receiveRating(double score) {
         rating = (rating * ratingCount + score) / (++ratingCount);
     }
@@ -78,10 +84,10 @@ public class Teacher extends Employee implements Researcher, Comparable<Teacher>
     }
 
     @Override
-    public void printPapers(Format format) {
+    public void printPapers(Comparator<ResearchPaper> comparator) {
         papers.stream()
-              .sorted(ResearchPaper.BY_CITATIONS)
-              .forEach(p -> System.out.println(p.getCitation(format)));
+              .sorted(comparator)
+              .forEach(p -> System.out.println(p.getCitation(Format.PLAIN_TEXT)));
     }
 
     @Override
