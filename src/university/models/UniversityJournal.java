@@ -1,8 +1,13 @@
 package university.models;
 
 import university.interfaces.JournalObserver;
-import university.interfaces.Researcher; 
+import university.interfaces.Researcher;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,11 +43,25 @@ public class UniversityJournal implements Serializable {
         papers.add(paper);
         notifySubscribers(paper.getTitle());
 
-        
         if (newsManager != null) {
-            String title = "New paper published in " + name;
+            // News about the new paper
+            String title   = "New paper published in " + name;
             String content = "\"" + paper.getTitle() + "\" has been published in " + name;
-            newsManager.createNews(title, content, "Research"); 
+            newsManager.createNews(title, content, "Research");
+
+            // Auto-news: top cited researcher in this journal
+            papers.stream()
+                .flatMap(p -> p.getAuthors().stream())
+                .distinct()
+                .max(Comparator.comparingInt(Researcher::calculateHIndex))
+                .ifPresent(top -> {
+                    if (top instanceof User u) {
+                        String topTitle   = "Top cited researcher in " + name + ": " + u.getFullName();
+                        String topContent = u.getFullName() + " leads with h-index="
+                                + top.calculateHIndex() + " in journal '" + name + "'.";
+                        newsManager.createNews(topTitle, topContent, "Research");
+                    }
+                });
         }
     }
     

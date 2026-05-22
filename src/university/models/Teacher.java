@@ -30,9 +30,15 @@ public class Teacher extends Employee implements Researcher, Comparable<Teacher>
             System.out.println("Error: " + getFullName() + " does not teach " + course.getName());
             return;
         }
-        student.receiveMark(course, mark);
-        System.out.printf("[Mark] %s → %s in %s: %s%n",
-                getFullName(), student.getFullName(), course.getName(), mark);
+        try {
+            student.receiveMark(course, mark);
+            System.out.printf("[Mark] %s → %s in %s: %s%n",
+                    getFullName(), student.getFullName(), course.getName(), mark);
+        } catch (university.exceptions.MaxFailsReachedException e) {
+            System.out.printf("[Mark] %s → %s in %s: %s%n",
+                    getFullName(), student.getFullName(), course.getName(), mark);
+            System.out.println("[WARNING] " + e.getMessage());
+        }
     }
 
     public void generateMarkReport(Course course) {

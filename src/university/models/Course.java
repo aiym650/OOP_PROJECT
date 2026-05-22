@@ -16,8 +16,8 @@ public class Course implements Serializable {
     private final List<Teacher> teachers         = new ArrayList<>();
     private final List<Lesson>  lessons          = new ArrayList<>();
     private final List<Student> enrolledStudents = new ArrayList<>();
-    private int forYear;     
-    private String forMajor;  
+    private int forYear;
+    private String forMajor;
 
     public Course(String courseId, String name, int credits, CourseType type,
                   int forYear, String forMajor) {
@@ -36,13 +36,20 @@ public class Course implements Serializable {
         }
     }
 
-    public void addLesson(Lesson lesson)   { lessons.add(lesson); }
+    public void addLesson(Lesson lesson) { lessons.add(lesson); }
 
     void enrollStudent(Student student) {
         if (!enrolledStudents.contains(student)) enrolledStudents.add(student);
     }
 
     void unenrollStudent(Student student) { enrolledStudents.remove(student); }
+
+    public CourseType getEffectiveType(String studentMajor) {
+        if (type == CourseType.FREE_ELECTIVE) return CourseType.FREE_ELECTIVE;
+        if (forMajor == null || forMajor.isEmpty()) return type;
+        if (forMajor.equalsIgnoreCase(studentMajor)) return type;
+        return CourseType.FREE_ELECTIVE;
+    }
 
     public String getInfo() {
         return String.format("Course[%s] %s | %d cr | %s | Year %d | Major: %s | Teachers: %d | Students: %d",
@@ -62,7 +69,8 @@ public class Course implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Course c)) return false;
+        if (!(o instanceof Course)) return false;
+        Course c = (Course) o;
         return Objects.equals(courseId, c.courseId);
     }
 

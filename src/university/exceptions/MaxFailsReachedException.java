@@ -1,6 +1,8 @@
 package university.exceptions;
+
 public class MaxFailsReachedException extends Exception {
-    public MaxFailsReachedException() {
-        super("Student has reached the maximum number of course failures (3).");
+    public MaxFailsReachedException(String studentName, int failCount) {
+        super("Student '" + studentName + "' has reached " + failCount
+                + " course failures (max allowed: 3). Academic suspension required.");
     }
 }

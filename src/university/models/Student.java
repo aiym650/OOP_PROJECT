@@ -49,15 +49,13 @@ public class Student extends User implements Comparable<Student> {
         }
     }
 
-    void receiveMark(Course course, Mark mark) {
+    void receiveMark(Course course, Mark mark) throws MaxFailsReachedException {
         marks.put(course, mark);
 
-        // Count fails
         if (mark.isFail()) {
             failCount++;
             if (failCount > MAX_FAILS) {
-                System.out.println("[Warning] " + getFullName()
-                        + " has exceeded max fails (" + MAX_FAILS + ")!");
+                throw new MaxFailsReachedException(getFullName(), failCount);
             }
         }
 
